@@ -1,0 +1,9 @@
+# files
+/sample_sheet_bclconvert.csv
+/sample_sheet_bcl2fastqformat.csv
+
+# pycache
+/__pycache__
+
+# folders
+/dump
