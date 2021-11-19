@@ -1,15 +1,15 @@
-from flask import Flask, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, request, redirect, url_for, flash, send_from_directory, render_template
 from werkzeug.utils import secure_filename
 from bcl_to_fastq import bcl_to_fastq
 import os
 
-# Creating dump dir with uploads, stage, downloads as subdirs
-if not os.path.exists(f"{os.getcwd()}/dump"):
-    os.mkdir(f"{os.getcwd()}/dump")
-    os.mkdir(f"{os.getcwd()}/dump/uploads")
-    os.mkdir(f"{os.getcwd()}/dump/downloads")
-    os.mkdir(f"{os.getcwd()}/dump/stage")
-
+def folder_create():
+    # Creating dump dir with uploads, stage, downloads as subdirs
+    if not os.path.exists(f"{os.getcwd()}/dump"):
+        os.mkdir(f"{os.getcwd()}/dump")
+        os.mkdir(f"{os.getcwd()}/dump/uploads")
+        os.mkdir(f"{os.getcwd()}/dump/downloads")
+        os.mkdir(f"{os.getcwd()}/dump/stage")
 
 UPLOAD_FOLDER = f'{os.getcwd()}/dump/uploads'
 DOWNLOAD_FOLDER = f'{os.getcwd()}/dump/downloads'
@@ -18,6 +18,7 @@ ALLOWED_EXTENSIONS = {'txt', 'csv'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['DOWNLOAD_FOLDER'] = DOWNLOAD_FOLDER
+app.config.from_mapping(SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev_key')
 
 
 def allowed_file(filename):
@@ -26,6 +27,7 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    folder_create()
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -50,20 +52,7 @@ def upload_file():
                 conv_filename = bcl_to_fastq(original_sample_sheet_path)
                 return redirect(url_for('download_file', name=conv_filename))
     
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <br></br>
-      <input type="checkbox" name=reverse_compliment value="world" checked>
-      <label for="reverse_compliment"> Check for reverse complement of index2 </label><br>
-      <br></br>
-      <button type=submit name=convert_download value=convert_download> Convert and Download </button>
-
-    </form>
-    '''
+    return render_template('index.html', boolean=True)
 
 
 @app.route('/uploads/<name>')
