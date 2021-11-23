@@ -60,7 +60,7 @@ def download_file(name):
     return send_from_directory(app.config["DOWNLOAD_FOLDER"], name)
 
 def start():
-    app.run()
+    app.run(port=5000)
 
 # run server
 if __name__=="__main__":
